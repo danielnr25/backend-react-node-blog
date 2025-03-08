@@ -1,17 +1,4 @@
 import { getAll, findById, create, update, remove, search } from '../models/Post.js';
-import multer from 'multer';
-import path from 'path';
-
-// Configuración de Multer para subir imágenes
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Carpeta donde se guardarán las imágenes
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`); // Renombrar la imagen con timestamp
-    }
-});
-const upload = multer({ storage });
 
 // Obtener todos los posts
 export const getAllPosts = async (req, res) => {
@@ -39,52 +26,53 @@ export const getPostById = async (req, res) => {
 
 // Crear un nuevo post con imagen
 export const createPost = async (req, res) => {
-    upload.single('image')(req, res, async (err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error al subir la imagen', error: err });
-        }
+   
+    const { title, content, user_id, category_id } = req.body;
+    const image = req.file ? req.file.filename : null; // Si hay imagen, guardar el nombre del archivo
 
-        const { title, content, user_id, category_id } = req.body;
-        const image = req.file ? req.file.filename : null; // Si hay imagen, guardar el nombre del archivo
+    if (!title || !content || !user_id || !category_id) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
 
-        if (!title || !content || !user_id || !category_id) {
-            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
-        }
+    try {
+        const newPost = await create(title, content, image, user_id, category_id);
+        res.status(201).json({ message: 'Post creado exitosamente', postId: newPost });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al crear el post', error });
+    }
 
-        try {
-            const newPost = await create(title, content, image, user_id, category_id);
-            res.status(201).json({ message: 'Post creado exitosamente', postId: newPost });
-        } catch (error) {
-            res.status(500).json({ message: 'Error al crear el post', error });
-        }
-    });
 };
 
 // Actualizar un post (con opción de cambiar imagen)
 export const updatePost = async (req, res) => {
-    upload.single('image')(req, res, async (err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error al subir la imagen', error: err });
-        }
+  
+    const { id } = req.params;
+    const { title, content, user_id, category_id } = req.body;
+    const image = req.file ? req.file.filename : req.body.image; // Mantener la imagen original si no se sube una nueva
 
-        const { id } = req.params;
-        const { title, content, user_id, category_id } = req.body;
-        const image = req.file ? req.file.filename : req.body.image; // Mantener la imagen original si no se sube una nueva
+    if (!title || !content || !user_id || !category_id) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
 
-        if (!title || !content || !user_id || !category_id) {
-            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
-        }
+    try {
 
-        try {
-            const updatedPost = await update(id, title, content, image, user_id, category_id);
-            if (updatedPost.affectedRows === 0) {
-                return res.status(404).json({ message: 'Post no encontrado' });
-            }
-            res.status(200).json({ message: 'Post actualizado exitosamente' });
-        } catch (error) {
-            res.status(500).json({ message: 'Error al actualizar el post', error });
+        const currentPost = await findById(id);
+        if(!currentPost || currentPost.length === 0){
+            return res.status(404).json({ message: 'Post no encontrado' });
+        } 
+
+        const saveImageUrl = image ? image:currentPost[0].image;
+
+
+        const updatedPost = await update(id, title, content,saveImageUrl, user_id, category_id);
+        if (updatedPost.affectedRows === 0) {
+            return res.status(404).json({ message: 'Post no encontrado' });
         }
-    });
+        res.status(200).json({ message: 'Post actualizado exitosamente' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar el post', error });
+    }
+
 };
 
 // Eliminar un post (soft delete)
