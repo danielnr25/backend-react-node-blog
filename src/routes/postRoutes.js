@@ -5,7 +5,8 @@ import {
    createPost,
    updatePost,
    deletePost,
-   searchPost
+   searchPost,
+   getLatestPosts
 } from '../controllers/postController.js';
 import { upload } from '../middlewares/Upload.js';
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 // Rutas para posts
 router.get('/search', searchPost);
 router.get('/', getAllPosts);
+router.get('/latestpost',getLatestPosts)
 router.get('/:id', getPostById);
 router.post('/', upload.single('image'), createPost);
 router.put('/:id', upload.single('image'), updatePost);

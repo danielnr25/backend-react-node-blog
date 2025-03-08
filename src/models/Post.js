@@ -11,6 +11,15 @@ export const getAll = async () => {
     }
 };
 
+export const getLatestPost = async() => {
+    try {
+        const [results] = await pool.query("SELECT p.id, p.title, p.content, p.image, p.user_id, p.category_id, users.username AS author, categories.name AS category FROM `posts` p LEFT JOIN users ON p.user_id = users.id LEFT JOIN categories ON p.category_id = categories.id WHERE p.deleted_at IS NULL ORDER BY p.id DESC LIMIT 6");
+        return results;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const findById = async (id) => {
     try {
         const [results] = await pool.query(

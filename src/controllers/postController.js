@@ -1,4 +1,4 @@
-import { getAll, findById, create, update, remove, search } from '../models/Post.js';
+import { getAll, findById, create, update, remove, search, getLatestPost } from '../models/Post.js';
 
 // Obtener todos los posts
 export const getAllPosts = async (req, res) => {
@@ -14,6 +14,19 @@ export const getAllPosts = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener los posts', error });
     }
 };
+
+export const getLatestPosts = async(req,res) =>{
+    try {
+        const posts = await getLatestPost();
+        const listPosts = posts.map((post)=>({
+            ...post,
+            image: process.env.HOST + '/uploads/' + post.image
+        })) 
+        res.status(200).json(listPosts);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los posts', error });
+    }
+}
 
 // Obtener un post por ID
 export const getPostById = async (req, res) => {
