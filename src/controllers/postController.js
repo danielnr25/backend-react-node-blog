@@ -4,7 +4,12 @@ import { getAll, findById, create, update, remove, search } from '../models/Post
 export const getAllPosts = async (req, res) => {
     try {
         const posts = await getAll();
-        res.status(200).json(posts);
+        const listPosts = posts.map((post)=>({
+            ...post,
+            image: process.env.HOST + '/uploads/' + post.image
+        })) 
+        
+        res.status(200).json(listPosts);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener los posts', error });
     }
