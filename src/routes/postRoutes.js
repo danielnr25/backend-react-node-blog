@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 import {
    getAllPosts,
    getPostById,
@@ -8,20 +7,9 @@ import {
    deletePost,
    searchPost
 } from '../controllers/postController.js';
-
+import { upload } from '../middlewares/Upload.js';
 const router = express.Router();
 
-// Configuración de multer para la subida de imágenes
-const storage = multer.diskStorage({
-   destination: (req, file, cb) => {
-      cb(null, 'uploads/'); // Carpeta donde se guardarán las imágenes
-   },
-   filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);
-   }
-});
-
-const upload = multer({ storage });
 
 // Rutas para posts
 router.get('/search', searchPost);
