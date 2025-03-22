@@ -1,5 +1,5 @@
 import { createComment,getCommentsByPost } from "../models/Comment.js";
-
+import pool from "../config/database.js";
 
 export const storeComment = async(req, res) =>{
     const {post_id, author, content} = req.body;
@@ -10,7 +10,7 @@ export const storeComment = async(req, res) =>{
 
     try {
         const result = await createComment(content,author,post_id);
-        res.status(201).json({ message: 'Comentario registrado exitosamente', comment_id: result.insertId });
+        res.status(201).json({ message: 'Comentario registrado exitosamente', comment_id:result.insertId });
     } catch (error) {
         res.status(500).json({message:error.message})
     }

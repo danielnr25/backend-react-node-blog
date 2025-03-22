@@ -13,7 +13,7 @@ export const createComment = async(content, author,postId) => {
 
 export const getCommentsByPost = async(post_id) => {
     try {
-        const [results] = await pool.query("SELECT * FROM comments WHERE post_id = ? ORDER BY id DESC",[post_id]);
+        const [results] = await pool.query("SELECT * FROM comments WHERE post_id = ? AND deleted_at IS NULL ORDER BY id DESC",[post_id]);
         return results;
     } catch (error) {
         throw error;
