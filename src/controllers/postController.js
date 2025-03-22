@@ -1,4 +1,4 @@
-import { getAll, findById, create, update, remove, search, getLatestPost } from '../models/Post.js';
+import { getAll, findById, create, update, remove, search, getLatestPost,findBySlug } from '../models/Post.js';
 
 // Obtener todos los posts
 export const getAllPosts = async (req, res) => {
@@ -42,18 +42,39 @@ export const getPostById = async (req, res) => {
     }
 };
 
+export const getPostBySlug = async (req, res) => {
+    const { slug } = req.params;
+    try {
+        const post = await findBySlug(slug);
+
+        if (!post || post.length === 0) {
+            return res.status(404).json({ message: 'Post no encontrado' });
+        }
+
+        const listPost = {
+            ...post,
+            image: post.image ? `${process.env.HOST}/uploads/${post.image}` : null
+        };
+
+        return res.status(200).json(listPost);
+    } catch (error) {
+        console.error("Error al obtener el post:", error);
+        return res.status(500).json({ message: 'Error al obtener el post', error });
+    }
+};
+
 // Crear un nuevo post con imagen
 export const createPost = async (req, res) => {
    
-    const { title, content, user_id, category_id } = req.body;
+    const { title, content, user_id, category_id,slug } = req.body;
     const image = req.file ? req.file.filename : null; // Si hay imagen, guardar el nombre del archivo
 
-    if (!title || !content || !user_id || !category_id) {
+    if (!title || !content || !user_id || !category_id || !slug) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
     try {
-        const newPost = await create(title, content, image, user_id, category_id);
+        const newPost = await create(title, content, image, user_id, category_id,slug);
         res.status(201).json({ message: 'Post creado exitosamente', postId: newPost });
     } catch (error) {
         res.status(500).json({ message: 'Error al crear el post', error });
@@ -65,10 +86,10 @@ export const createPost = async (req, res) => {
 export const updatePost = async (req, res) => {
   
     const { id } = req.params;
-    const { title, content, user_id, category_id } = req.body;
-    const image = req.file ? req.file.filename : req.body.image; // Mantener la imagen original si no se sube una nueva
-
-    if (!title || !content || !user_id || !category_id) {
+    const { title, content, user_id, category_id,slug } = req.body;
+    const image = req.file ? req.file.filename : null; // Mantener la imagen original si no se sube una nueva
+    
+    if (!title || !content || !user_id || !category_id || !slug) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
@@ -82,7 +103,7 @@ export const updatePost = async (req, res) => {
         const saveImageUrl = image ? image:currentPost[0].image;
 
 
-        const updatedPost = await update(id, title, content,saveImageUrl, user_id, category_id);
+        const updatedPost = await update(id, title, content,saveImageUrl, user_id, category_id,slug);
         if (updatedPost.affectedRows === 0) {
             return res.status(404).json({ message: 'Post no encontrado' });
         }
