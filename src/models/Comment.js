@@ -3,7 +3,7 @@ import pool from "../config/database.js";
 export const createComment = async(content, author,postId) => {
     try {
         const [results] = await pool.query(
-            "INSERT INTO comments(content,username,post_id) VALUES (?,?,?)",[content,author,postId]
+            "INSERT INTO comments(content,username,post_id,created_at, updated_at) VALUES (?,?,?,NOW(), NOW())",[content,author,postId]
         );
         return results;
     } catch (error) {
