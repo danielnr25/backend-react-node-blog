@@ -1,4 +1,4 @@
-import { createComment,getCommentsByPost } from "../models/Comment";
+import { createComment,getCommentsByPost } from "../models/Comment.js";
 
 
 export const storeComment = async(req, res) =>{
