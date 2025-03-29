@@ -38,7 +38,7 @@ export const create = async (title, content, image, user_id, category_id,slug) =
             "INSERT INTO posts (title, content, image, user_id, category_id,slug, created_at, updated_at) VALUES (?, ?, ?, ?, ?,?,NOW(), NOW())",
             [title, content, image, user_id, category_id,slug]
         );
-        return results.insertId; // Devolver el ID del post creado
+        return results.insertId; // Devolver el ID del post creado para subir github
     } catch (error) {
         throw error;
     }
